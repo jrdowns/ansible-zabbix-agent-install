@@ -1,0 +1,7 @@
+---
+
+zabbix_psk_path: "/etc/zabbix/zabbix_agent_key.psk"
+
+zabbix_conf_path: "/etc/zabbix/zabbix_agent2.d/"
+
+zabbix_proxy_dc: "gab"

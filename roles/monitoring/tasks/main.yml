@@ -1,0 +1,65 @@
+---
+
+- name: Old zabbix-agent not installed
+  ansible.builtin.apt:
+    name: zabbix-agent
+    state: absent
+
+- name: Add Zabbix repo
+  shell: "{{ item }}"
+  loop:
+    - "wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix/zabbix-agent2_6.0.6-1%2Bubuntu18.04_amd64.deb"
+    - "dpkg -i zabbix-agent2_6.0.6-1+ubuntu18.04_amd64.deb"
+    - "apt update"
+    
+- name: Install Zabbix agent
+  ansible.builtin.apt:
+    name: zabbix-agent2
+    state: present
+  notify: restart_zabbix_agent
+
+- name: Copy zabbix_agentd.conf from template
+  template:
+    src: "zabbix_agent2.esys.conf"
+    dest: "{{ zabbix_conf_path }}zabbix_agent2.esys.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify: restart_zabbix_agent
+
+- name: Check if pre-shared key already exists
+  ansible.builtin.file:
+    path: "{{ zabbix_psk_path }}"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  register: psk_file
+
+- name: Generate psk
+  shell: "openssl rand -hex 32 > {{ zabbix_psk_path }}" 
+  when: psk_file.changed
+
+- name: Set ownership
+  ansible.builtin.file:
+    path: "{{ zabbix_psk_path }}"
+    state: file
+    owner: "zabbix"
+    group: "zabbix"
+    mode: "0640"
+
+- name: Get host psk
+  shell: "cat {{ zabbix_psk_path }}"
+  register: zabbix_cat_psk
+
+- name: Print PSK
+  debug:
+    msg: "{{ zabbix_psk_id }} : {{ zabbix_cat_psk.stdout }}"
+  
+- name: Zabbix agent is enabled and running
+  systemd:
+    name: zabbix-agent2
+    enabled: yes
+    state: started
+
+- name: Restart zabbix agent
+  meta: flush_handlers

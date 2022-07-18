@@ -1,0 +1,13 @@
+---
+
+zabbix_proxy_gab:
+  ip: "129.120.108.120"
+  name: "ets-mon-prx01"
+
+zabbix_proxy_dp:
+  ip: "129.120.175.121"
+  name: "ets-mon-prx02"
+
+zabbix_server_active: "{{ lookup('vars', 'zabbix_proxy_' + zabbix_proxy_dc) }}"
+  
+zabbix_psk_id: "PSK ID {{ ansible_facts['fqdn'] }}"
