@@ -1,0 +1,13 @@
+---
+- name: Set up Zabbix agent
+  gather_facts: yes
+  hosts: all
+  become: yes
+
+  vars:
+    zabbix_proxy_dc: "gab"
+  
+  tasks:
+    - name: execute monitoring role
+      include_role: 
+        name: "monitoring"

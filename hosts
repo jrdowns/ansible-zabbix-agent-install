@@ -1,0 +1,8 @@
+[all:children]
+farm03
+
+[farm03:children]
+farm03_dev
+
+[farm03_dev]
+lemp01-dev-f03.cws.gabdcn.unt.edu
